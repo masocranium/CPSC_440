@@ -41,8 +41,17 @@ def best_fit(X, k, reps=50, cls=KMeans):
     # Use  cls(X, k, plot=False, log=False)  to fit a model,
     # so it'll work for both KMeans and KMedians.
     # (Passing plot=False makes it run a *lot* faster, and log=False avoids a ton of clutter.)
+    best_model = None
+    best_loss = float("inf")
+    for _ in range(reps):
+        model = cls(X, k, plot=False, log=False)
+        current_loss = model.loss(X)
+        if current_loss < best_loss:
+            best_loss = current_loss
+            best_model = model
 
-    raise NotImplementedError()
+
+    return best_model
 
 
 @handle("kmeans-best")
