@@ -103,8 +103,39 @@ def q_lsq_rbf():
 @handle("lsq-rbf-split")
 def q_lsq_rbf_split():
     X, y = load_dataset("basis_data", "X", "y")
+    n = X.shape[0]
+    # split into 50% train, 50% validation
+    X_train, y_train = X[: n // 2], y[: n // 2]
+    X_val, y_val = X[n // 2 :], y[n // 2 :]
 
-    raise NotImplementedError()
+    best_sigma = None
+    best_lam = None
+    best_loss = float("inf")
+    
+    # Candidates
+    sigmas = [0.01, 0.1, 1, 10, 100]
+    lambdas = [0.01, 0.1, 1, 10, 100]
+    
+    for sigma in sigmas:
+        for lam in lambdas:
+            # Train on training set
+            model = LeastSquaresRBFL2(X_train, y_train, lam=lam, sigma=sigma)
+            
+            # Evaluate on test set
+            preds = model.predict(X_val)
+            loss = np.mean((preds - y_val) ** 2)
+            
+            if loss < best_loss:
+                best_loss = loss
+                best_sigma = sigma
+                best_lam = lam
+
+    print(f"Best sigma: {best_sigma}, Best lambda: {best_lam}, Validation Loss: {best_loss}")
+
+    # Refit on the full dataset with the best hyperparameters
+    final_model = LeastSquaresRBFL2(X, y, lam=best_lam, sigma=best_sigma)
+
+    test_and_plot(final_model, X, y, filename="leastsquares-rbfl2-split.png")
 
 
 class ComboModel:
