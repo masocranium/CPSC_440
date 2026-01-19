@@ -191,7 +191,17 @@ def q_relu_hinges():
 
             # find the locations of the "hinges" in the prediction
             with torch.no_grad():
-                hinges = torch.zeros(3)
+                # 1. Get the list of parameters
+                params = list(model.parameters())
+
+                # 2. Extract first layer weights and biases
+                w = params[0]
+                b = params[1]
+
+                # 3. Calculate hinge locations: x = -b / w
+                # We use .view(-1) or .squeeze() on w to make it shape [8] so it divides element-wise
+                hinges = -b / w.reshape(-1)
+
 
             test_and_plot(model, X, y, ax=ax, plot_lims=(-7, 7))
             for hinge in hinges.ravel():
