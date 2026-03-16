@@ -1,0 +1,532 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm,thmtools}
+\usepackage{dsfont}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{parskip}
+
+\usepackage[colorlinks,linkcolor=red!80!black]{hyperref}
+\usepackage[noabbrev,capitalize]{cleveref}
+
+% Use one or the other of these for displaying code.
+% NOTE: If you get
+%  ! Package minted Error: You must invoke LaTeX with the -shell-escape flag.
+% and don't want to use minted, just comment out the next line
+\usepackage{minted} \BeforeBeginEnvironment{minted}{\begingroup\color{black}} \AfterEndEnvironment{minted}{\endgroup} \setminted{autogobble,breaklines,breakanywhere,linenos}
+
+\usepackage{listings}
+
+
+% Commands for questions and answers
+\definecolor{question}{rgb}{0,0,1}
+\newcommand{\ask}[1]{\textcolor{question}{#1}}
+\newenvironment{asking}{\begingroup\color{question}}{\endgroup}
+
+\crefname{section}{Question}{Questions}
+\newlist{qlist}{enumerate}{1}
+\setlist[qlist,1]{leftmargin=*, label=\textbf{[\thesection.\arabic*]}, ref={[\thesection.\arabic*]}}
+\crefname{qlisti}{Question}{Questions}
+
+\definecolor{answer}{rgb}{0,.5,0}
+\newcommand{\ans}[1]{\par\textcolor{answer}{Answer: #1}}
+\newenvironment{answer}{\par\begingroup\color{answer}Answer: }{\endgroup}
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+\definecolor{points}{rgb}{0.6,0.3,0}
+\newcommand{\pts}[1]{\textcolor{points}{[#1~points]}}
+
+\newcommand{\hint}[1]{\textcolor{black!60!white}{\emph{Hint: #1}}}
+\newcommand{\meta}[1]{\textcolor{black!60!white}{\emph{#1}}}
+
+\newcommand{\TODO}{\red{TODO}}
+
+% misc shortcuts
+\newcommand{\fig}[2]{\includegraphics[width=#1\textwidth]{#2}}
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+
+% Math
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\Bern}{Bern}
+\DeclareMathOperator{\Cat}{Cat}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\ELBO}{ELBO}
+\DeclareMathOperator{\Entropy}{Entropy}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Var}{Var}
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\bSigma}{\boldsymbol{\Sigma}}
+\newcommand{\bmu}{\boldsymbol{\mu}}
+\newcommand{\bL}{\mathbf{L}}
+\newcommand{\Bm}{\mathbf{m}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bZ}{\mathbf{Z}}
+\DeclareMathOperator{\indic}{\mathds{1}}
+\DeclareMathOperator{\M}{\mathcal{M}}
+\DeclareMathOperator{\N}{\mathcal{N}}
+\newcommand\R{\mathbb{R}}
+\newcommand{\tp}{^\mathsf{T}}
+\newcommand{\mtp}{^{-\mathsf{T}}}
+
+\newcommand{\toth}[1]{^{(#1)}}
+\newcommand{\ith}{\toth{i}}
+
+% \abs*{} uses auto-sized bars; \abs{} uses normal-sized ones
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiterX{\inner}[2]{\langle}{\rangle}{#1,#2}
+
+\numberwithin{equation}{section}
+
+\declaretheorem[numberwithin=section]{lemma}
+
+\begin{document}
+
+\begin{center}
+\Large
+CPSC 440/550 Advanced Machine Learning (Jan-Apr 2025)\\
+Assignment 2 --
+due Sunday March 22 at \textbf{11:59pm}
+\end{center}
+
+
+The assignment instructions are the same as for the previous assignment, but for this assignment you can work in groups of 1 or 2. Please only hand in one assignment for the group, and use the Gradescope group feature.
+
+
+\section{Categorical Inference \pts{20}}
+
+Consider a categorical distribution that takes value
+$1$ with probability $0.42$,
+$2$ with probability $0.24$,
+and $3$ with probability $0.34$.
+\begin{qlist}
+
+\item \pts{2}
+    Suppose we generate four iid samples $\{x\toth{1},x\toth{2},x\toth{3},x\toth{4}\}$ according to this model.
+    \ask{What is the probability that all four samples are equal to 3?}
+
+\begin{answer}\TODO\end{answer}
+
+
+
+\item \pts{2}
+    Write a Python function that generates $t$ iid examples from this distribution,
+    based on numpy's \href{https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random}{\texttt{rng.random()} function} (which returns uniformly pseudo-random numbers in $[0, 1]$) as the source of randomness.
+    Do not use other random generation functions or functions designed specifically for this purpose,
+    though ``general-purpose'' numpy routines are fine.
+    Your implementation does not need to be particularly efficient.
+    \ask{Hand in your code.}
+\begin{answer}\TODO\end{answer}
+
+
+\item \pts{2}
+    Consider a ``game'' where you get \$15 if a sample from this distribution is even, and lose \$4 if the sample is odd.
+    \ask{What is the expected \$ value you get from playing this game once?}
+\begin{answer}\TODO\end{answer}
+
+\item \pts{6}
+    If you weren't able to do that math, one way to approximate the answer of the previous question is to take
+    \[ \frac 1 t \sum_{i=1}^t f(x\ith), \]
+    where each $x\ith$ is an iid sample, and $f$ gives the \$ value for that sample (either 15 or -4).
+
+    Implement this approximation, and use the code in \texttt{expval\_mc} (inside \texttt{main.py}) to plot the following:
+    draw a line of the ``running mean'' of the approximation as you see more samples,
+    going from 1 to 100,000 samples.
+    Show three independent runs on the same plot, in different colours
+    (just calling \texttt{ax.plot} more than once and using its default colour cycle is fine).
+    Also use \texttt{ax.axhline} to show the analytical expected value from the previous part.
+    \ask{Hand in this plot.}
+
+\begin{answer}\TODO\end{answer}
+
+
+\item \pts{8}
+    Now, suppose that you start playing the game with \$40.
+    You'd really like to turn that into \$300 to have an exorbitant night on the town,
+    but if you ever can't pay your debt (that is, your balance goes below \$0)
+    then you need to go on the lam.
+    What's the probability that you'll be able to have a fun night?
+    \ask{Answer to within 1\%}, i.e.\ if the answer were exactly 21.34\% (it's not)
+    then it's okay if your answer is anywhere between 20.34\% and 22.34\%.
+    \ask{Hand in your code and a justification that your answer is accurate enough.}
+
+    \meta{You could use Monte Carlo, or you could compute it analytically, or various other approaches. Remember not to look up specific homework problems online!}
+
+\begin{answer}\TODO\end{answer}
+
+
+
+\end{qlist}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Maximizing a simple expectation \pts{25}}
+\begin{qlist}
+\item \pts{5} When we derived the EM algorithm for a general $p(\bX, \bZ \mid \theta)$ with a variational distribution $q$ (depending on $\bX$ and $\theta$) over the variable $\bZ$,
+  we used
+\[
+    \ELBO_{q}(\bX) = \E_{\bZ \sim q} \log p(\bX, \bZ \mid \theta) + \Entropy(q)
+.\]
+  When deriving VAEs, we instead used a per-sample ELBO with a variational distribution $q$ specifically for the $Z$ corresponding to a given $X$:
+\[
+    \ELBO_{q_x}(x) = \E_{Z \sim q_x} \log p(x, Z \mid \theta) + \Entropy(q_x)
+.\]
+  \ask{Show that if $(x\ith, z\ith)$ are iid under $p$ and $q(\bZ) = \prod_{i=1}^n q_i(z\ith)$,
+  then $\ELBO_q(\bX) = \sum_{i=1}^n \ELBO_{q_{i}}(x\ith)$.}
+  You may assume that $z$ is discrete, if you prefer,
+  although it won't fundamentally change the proof.
+  \begin{answer}\TODO\end{answer}
+\end{qlist}
+
+Now, let's consider a particular problem:
+the one-dimensional data distribution
+\[
+    Z \sim \Bern(1/2)
+    \qquad
+    X \mid (Z = z) \sim \N(\mu z, 1)
+\]
+so that the marginal distribution of $X$ is simply
+$\frac12 \N(0, 1) + \frac12 \N(\mu, 1)$.
+Given $n$ iid samples $\bX = (x\toth{1}, \dots, x\toth{n})$ from $X$,
+we'd like to estimate the single parameter $\mu$.
+
+Here $z\ith$ is a binary random variable;
+we can therefore say that $q_i = \Bern(r\ith)$,
+for a parameter $r\ith \in [0, 1]$.
+Let $\psi(t) = - t \log t - (1-t) \log(1-t)$ be a function defined on $(0, 1)$.
+
+\begin{qlist}[resume]
+\item \pts{5}
+    \ask{Show that, given parameters $\mu$ and $r\ith$,
+    we have in this problem that
+    \begin{equation}
+        \ELBO_{q_i}(x\ith)
+        = -\frac12 \log(8\pi) - \frac12 \left(x\ith\right)^2 + \mu r\ith x\ith - \frac12 \mu^2 r\ith
+        + \psi\left(r\ith\right)
+    \label{eq:elbo-qi}
+    .\end{equation}
+    }
+    \begin{answer}\TODO\end{answer}
+
+    \item \pts{4}
+    In the argument deriving the E step of EM,
+    we appealed to the KL divergence to show that maximizing the ELBO matches $q_i$
+    to the conditional distribution of $Z\ith \mid x\ith$.
+    In this case, that's the Bernoulli with parameter equal to the responsibility
+    \begin{align*}
+        r\ith
+     &= p(Z\ith = 1 \mid \theta, x\ith)
+    \\&= \frac{p(Z\ith = 1) p(x\ith \mid Z\ith = 1, \theta)}{p(Z\ith = 0) p(x\ith \mid Z\ith = 0, \theta) + p(Z\ith = 1) p(x\ith \mid Z\ith = 1, \theta)}
+    \\&= \frac{\frac12 p(x\ith \mid Z\ith = 1, \theta)}{\frac12 p(x\ith \mid Z\ith = 0, \theta) + \frac12 p(x\ith \mid Z\ith = 1, \theta)}
+    \\&= \frac{e^{-\frac12 (x\ith - \mu)^2}}{e^{-\frac12 (x\ith)^2} + e^{-\frac12 (x\ith - \mu)^2}}
+    \\&= \frac{1}{e^{-\frac12 (x\ith)^2} e^{\frac12 (x\ith - \mu)^2} + 1}
+    \\&= \frac{1}{1 + e^{-\mu x\ith + \frac12 \mu^2}}
+      = \sigma\left( \mu x\ith - \frac12 \mu^2 \right)
+    ,\end{align*}
+    where $\sigma(t) = 1 / (1 + \exp(-t))$ is the logistic sigmoid function.
+    \meta{Checking that this result makes sense: as $\mu x\ith \to \infty$, $r\ith \to 1$; as $\mu x\ith \to -\infty$, $r\ith \to 0$; if $x\ith = \mu / 2$, then $r\ith = \frac12$.}
+
+    \ask{Show directly from \eqref{eq:elbo-qi}, without appealing to the responsibility or the KL divergence argument,
+    that this is indeed the same value which maximizes $\ELBO_{q_i}(x\ith)$ for a given $\mu$.}
+    \begin{answer}\TODO\end{answer}
+
+    \item \pts{4} \ask{%
+        Show that, for fixed $r\toth{1}, \dots, r\toth{n}$, the $\ELBO_q(\bX)$ is maximized when
+        $\mu = \frac{\sum_i r\ith x\ith}{\sum_i r\ith}$.
+    }
+    \begin{answer}\TODO\end{answer}
+
+    \item \pts{7}
+      The function \texttt{plot\_em} in \texttt{main.py}
+      loads some data sampled from this distribution,
+      with some particular value for $\mu$.
+      Fill in the code to compute the \texttt{log\_liks} array
+      and to run EM;
+      \ask{hand in your code and the resulting figure},
+      which should show EM quickly converging towards the maximum of this 1d likelihood function.
+      \begin{answer}\TODO\end{answer}
+\end{qlist}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Naive Bayes \pts{25}}
+
+Let's fit the following naive Bayes model on binarized MNIST:
+\[
+    Y \sim \Cat(\theta)
+    \qquad
+    \theta_j \sim \operatorname{Beta}(\alpha, \beta)
+    \qquad
+    X_j \mid (Y = y, \theta_j) \sim \Bern(\theta_{j \mid y})
+.\]
+(We don't really need to put a prior on the $Y$ parameter $\theta$, since we have plenty of samples there,
+but if we don't use a prior on $\theta_j$ we'll get some \texttt{NaN}s.)
+
+\begin{qlist}
+
+
+\item \pts{10}
+    Implement MAP in this model in \texttt{naive\_bayes.py}. 
+    \ask{Hand in your code, and the output of \texttt{python main.py mnist-nb}, which tests with several different choices for $\alpha = \beta$.}
+
+\begin{answer}\TODO\end{answer}
+
+
+\end{qlist}
+
+This model is okay, but not great.
+How much better can we expect to get?
+\texttt{python main.py mnist-logreg} will fit a multiclass logistic regression (aka softmax regression) model from scikit-learn,
+which gets about 7.6\% error, less than half the error rate of naive Bayes.
+(Various nonlinear models can get almost zero error on this problem.)
+So, let's try a way to make naive Bayes less naive, which will substantially improve its performance.
+
+It seems reasonable that there would be clusters in the classes.
+For example, there might are several different ``general ways'' to draw the digit \texttt{7}.
+Instead of assuming that the features are independent given the class label,
+we might instead assume they're independent given the \emph{cluster} that they are in.
+
+We could treat this all probabilistically,
+but that'd entail a somewhat complicated EM training loop.
+Instead, let's consider a \emph{vector-quantized naive Bayes} (VQNB) implementing a version of this idea:
+\begin{itemize}
+\item
+    It clusters the examples associated with \emph{each digit} into $k$ clusters, using k-means clustering
+    ($k$ clusters for each class, $10 k$ clusters total).
+    We'll use $z \ith$ as the cluster number of example $i$.
+    The value $z \ith$ will be from $1$ to $k$,
+    with $y \ith$ determining whether we are considering the $k$ ``0'' clusters, the $k$ ``1'' clusters, or so on.
+\item
+    Since we don't know $z \ith$ (it is a ``latent variable''),
+    we can marginalize over its possible values.
+    Using the marginalization and then the product rule, we can write the joint probability as
+\begin{align*}
+    p(x_1\ith, x_2\ith,\dots,x_d\ith, y\ith)
+ &= \sum_{z=1}^k p(x_1\ith, x_2\ith, \dots, x_d\ith, y\ith, z\ith = z)
+\\&= \sum_{z=1}^k  p(x_1\ith, x_2\ith, \dots, x_d\ith \mid y\ith, z\ith = z) \; p(y\ith, z\ith = z)
+\\&= \sum_{z=1}^k  p(x_1\ith, x_2\ith, \dots, x_d\ith \mid y\ith, z\ith = z) \; p(z\ith = z \mid y\ith) \; p(y\ith)
+\\&= p(y\ith) \sum_{z=1}^k p(z \mid y\ith) \left[ \prod_{j=1}^d p(x_j\ith \mid y\ith, z) \right]
+;\end{align*}
+the last line uses independence of the features given the cluster.
+\end{itemize}
+
+\begin{qlist}[resume]
+\item \pts{12}
+    Implement the VQNB method (there's a stub in \texttt{naive\_bayes.py}).
+    \ask{Hand in your code, and the test error you obtain with this model for $k=2$ through $k=5$.}
+
+    \hint{The same KMeans class as last time is in the handout code for you to use, or feel free to use \texttt{scikit-learn}'s.}
+
+    \hint{
+        $p(y)$ you can handle just as before.
+        $p(z \mid y)$ is a categorical variable.
+        $p(x_j \mid y, z)$ is Bernoulli; you'll have one Bernoulli parameter for each $(y, z)$ pair, which it might be convenient to organize in a $10 \times k$ array.
+    }
+
+    \hint{If you're working with log-probabilities (which is a good idea), \texttt{scipy.special.logsumexp} might be helpful for the sum operation.}
+
+    \hint{To help with debugging, note that you should get the naive Bayes model in the special case of $k=1$. Further, with this type of model you usually see the biggest performance gain when going from $k=1$ to $k=2$.}
+
+    \hint{You probably won't be able to exactly match the performance of logistic regression, but it'll get closer.}
+
+\begin{answer}\TODO\end{answer}
+
+
+\item \pts{3}
+    For a run of the method with $k=5$,
+    \ask{show the images obtained by plotting the estimates for $p(x_j = 1 \mid z, y)$ for all $j$ as a 28 by 28 image, for each value of $z$ and $y$} (so there should be 50 images).
+    There's a code stub in there for plotting it, just fill that out slightly.
+
+\begin{answer}\TODO\end{answer}
+
+
+
+\end{qlist}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Generative Gaussians Galore \pts{30}}
+
+The following is the probabilistic model for linear discriminant analysis (LDA):
+
+\[
+    Y \sim \Cat(\pi)
+    \qquad
+    (X \mid Y = c) \sim \N(\bmu_c, \bSigma)
+.\]
+LDA is the generative classifier $\argmax_c p(Y = c \mid X = x)$.
+
+\textbf{If you get an import error saying something about \texttt{sklearn}, pip/conda/otherwise install scikit-learn.}
+
+\begin{qlist}
+\item \pts{7}
+There is a partial implementation of LDA in \texttt{lda.py}.
+Finish the \texttt{fit()} function to implement the MLE,
+and \ask{submit your code and the figure generated by \texttt{main.py plot-boundaries}},
+which shows the decision boundaries for both your LDA and scikit-learn's multinomial logistic regression.
+
+While you probably won't see an obvious difference between a ``naive'' implementation
+and one that does linear algebra ``nicely'' on this small dataset,
+you'll get \pts{2 bonus} if your implementation uses ``good'' linear algebra;
+here the best thing to do is probably to use the Cholesky decomposition
+(\texttt{scipy.linalg.solve\_cho} or \texttt{scipy.linalg.solve\_triangular}).
+\begin{answer}\TODO\end{answer}
+
+\item \pts{4}
+\texttt{main.py learning-curves} produces training and test accuracy curves as a function of training set size $n$
+for both logistic regression and your LDA implementation.
+(The lines show median accuracies, and areas around them interquartile ranges, the spread from the 25th percentile to 75th.)
+It does this both for the 2d data distribution we were just looking at,
+and then for a 17-dimensional distribution
+that's the same but adds independent noise dimensions:
+$X_3 \sim \N(0, 1)$,
+$X_4 \sim \N(0, 2)$, \dots,
+$X_{17} \sim \N(0, 15)$.
+\ask{Include both plots, and explain the relevant patterns you see.}
+
+\meta{You might get some numerical errors for the lower sample sizes in the higher-dimensional part. You can avoid this by adding a very small amount, say \texttt{1e-8}, to the diagonal of your covariance estimate. This is technically not quite the MLE anymore, but it's fine.}
+
+\begin{answer}\TODO\end{answer}
+\end{qlist}
+
+Now, we'll turn to another use of LDA that we didn't describe in class:
+as a form of supervised dimensionality reduction.
+
+\begin{qlist}[resume]
+\item \pts{4}
+Let the global mean of the distribution, $\sum_c \pi_c \bmu_c$, be $\bmu$,
+and define $\Bm_c = \bmu_c - \bmu$.
+Let $f_c(x) = \log p(y = c \mid x) + \mathrm{const}$
+so that $\argmax_c f_c(x)$ gives the optimal classifier;
+\ask{write $f_c$ as a function only of
+$(x - \bmu)\tp \bSigma^{-1} \Bm_c$, plus something depending on $\Bm_c$ and $\pi_c$ (but not $x$)}.
+\begin{answer}\TODO\end{answer}
+
+\end{qlist}
+Since this is true for each $c$,
+this means that the optimal classification function ``cares'' only about $x$
+in the dot products of $x - \bmu$ with each of the $\bSigma^{-1} \Bm_c$:
+that is, only the part of $x-\mu$ in the subspace
+$\M = \operatorname{span}\bigl( \{ \bSigma^{-1} \Bm_1, \dots, \Sigma^{-1} \Bm_k \} \bigr)$ matters,
+and any component of $x - \mu$ outside of that is just irrelevant.
+Since we know that $\sum_c \pi_c \Bm_c = \sum_c \pi_c \bigl(\bmu_c - \sum_{c'} \pi_{c'} \bmu_{c'}\bigr) = 0$,
+we also have $\sum_c \pi_c \bSigma^{-1} \Bm_c = 0$,
+and hence $\M$ is of dimension at most $k-1$.
+So, in this probabilistic model,
+there are at most $k-1$ directions that matter:
+everything else is just noise.
+We also know exactly how to estimate these directions:
+just estimate $\bSigma$ and each of the $\bmu_c$,
+then plug in.
+
+Our last step: what if I don't want $k-1$ dimensions?
+There's no point in going to something higher,
+but what if I want to go to fewer than $k-1$ dimensions?
+Let's start by asking what we should do to go to \emph{one} dimension.
+
+Let's try looking at a linear mapping $w\tp X$ for a random $X$.
+We can rewrite
+$X = \bL Z + \bmu_Y$,
+where $Y$ is the categorical label,
+$Z$ is standard normal,
+and $\bL$ is the same shape as $\bSigma$ such that $\bL \bL\tp = \bSigma$.
+Then
+\[
+    w\tp X = w\tp \bL Z + w\tp \bmu_Y
+.\]
+The first term here is classification-irrelevant noise,
+$w\tp \bL Z \sim \N(0, w\tp \bSigma w)$.
+The second term, $w\tp \bmu_Y$, is the signal that actually tells us anything about $Y$
+(and, clearly, depends \emph{only} on $Y$).
+What's its variance?
+\begin{qlist}[resume]
+\item \pts{3}
+Show that $\Var(w\tp \bmu_Y) = w\tp \bSigma_B w$,
+where $\bSigma_B = \sum_c \pi_c (\bmu_c - \bmu) (\bmu_c - \bmu)\tp$
+is the between-group (co)variance.
+
+\hint{This is basically a one-line question about the definition of the covariance matrix.}
+\begin{answer}\TODO\end{answer}
+\end{qlist}
+
+For our projection to be informative,
+we want to choose a $w$ such that $w\tp \bSigma_B w$ is as big as possible
+relative to $w\tp \bSigma w$.
+
+The following standard fact about the ``Rayleigh quotient'' may be useful.
+\begin{lemma} \label{thm:rayleigh}
+    For a symmetric matrix $A$ with eigenvalues $\lambda_i$ and corresponding orthonormal eigenvectors $q_i$,
+    $\max_{w \ne 0} \frac{w\tp A w}{\norm w^2} = \max_i \lambda_i$,
+    with the maximum achieved by any $w$
+    in $\operatorname{span}\bigl( \{ q_i : \lambda_i = \max_j \lambda_j \} \bigr)$.
+\end{lemma}
+\begin{proof}
+    Write $w$ in the eigenbasis of $A$:
+    $w = \sum_i a_i q_i$.
+    Then $w\tp w = \sum_ij a_i q_i\tp q_j a_j = \sum_i a_i^2$,
+    and since $A = \sum_i \lambda_i q_i q_i\tp$,
+    we similarly have $w\tp A w = \sum_i a_i^2 \lambda_i$.
+    Thus the objective funciton can be written $\sum_i \frac{a_i^2}{\sum_j a_j^2} \lambda_i$,
+    a weighted mean of the eigenvalues.
+    This is maximized iff all nonzero $a_i$ are on the maximal $\lambda_i$.
+\end{proof}
+
+\begin{qlist}[resume]
+\item \pts{5}
+Assuming that $\bSigma$ is strictly positive definite,
+\ask{show that}
+\[
+    \argmax_{w \ne 0} \frac{w\tp \bSigma_B w}{w\tp \bSigma w}
+\]
+can be given by finding a top eigenvector $v$
+(an eigenvector corresponding to the largest eigenvalue $\lambda_{\max}$)
+of the positive-definite matrix $\bL^{-1} \bSigma_B \bL\mtp$,
+then taking $w = \bL\mtp v$.
+
+Also \ask{show that this implies $\bSigma_B w = \lambda_{\max} \bSigma w$},
+known as a ``generalized eigenvector.''
+
+\begin{answer}\TODO\end{answer}
+\end{qlist}
+
+Extending the logic of the previous part,
+we can see that if we want to find an $r$-dimensional projection (for $r \le k-1$),
+we want the $r$ top eigendirections,
+the subspace of the $r$ eigenvectors with the $r$ largest eigenvalues.
+
+\begin{qlist}[resume]
+\item \pts{7}
+Implement the \texttt{transform} method in the \texttt{LDA} class
+to do supervised dimensionality reduction with LDA.
+\texttt{main.py lda-projection}
+then compares your supervised LDA projection
+to an unsupervised PCA projection
+on this distribution with 15 noise dimensions.
+You might want to change the \texttt{fit} function to support what you need for this (or not, you do you).
+\ask{Hand in your code and the produced figure.}
+
+\hint{It might be handy to use \texttt{scipy.linalg.solve\_triangular} or \texttt{scipy.linalg.eigh}.}
+
+\begin{answer}\TODO\end{answer}
+
+\end{qlist}
+
+
+\end{document}
