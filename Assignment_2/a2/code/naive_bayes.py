@@ -23,10 +23,30 @@ class NaiveBayes:
         self.y_probs = np.bincount(y) / n
         self.num_classes = k = len(self.y_probs)
 
-        raise NotImplementedError()
+        # Compute theta matrix (k x d) where theta[i, j] = P(X_j = 1 | Y = i)
+        self.theta = np.zeros((k, self.d))
+        for i in range(k):
+            # Get the indices of samples belonging to class i
+            class_indices = np.where(y == i)[0]
+            # Calculate the number of samples in class i
+            n_i = len(class_indices)
+            if n_i == 0:
+                # If there are no samples for this class, use the prior
+                self.theta[i] = (self.prior_alpha) / (self.prior_alpha + self.prior_beta)
+            else:
+                # Calculate the number of times each feature is 1 in class i
+                feature_counts = np.sum(X[class_indices], axis=0)
+                # Apply Laplace smoothing
+                self.theta[i] = (feature_counts + self.prior_alpha) / (n_i + self.prior_alpha + self.prior_beta)
+
 
     def predict(self, X):
-        raise NotImplementedError()
+        # Compute the log probabilities for each class
+        log_probs = np.zeros((X.shape[0], self.num_classes))
+        for i in range(self.num_classes):
+            log_probs[:, i] = np.sum(X * np.log(self.theta[i]) + (1 - X) * np.log(1 - self.theta[i]), axis=1) + np.log(self.y_probs[i])
+        # Predict the class with the highest log probability
+        return np.argmax(log_probs, axis=1)
 
 
 class VQNB:
