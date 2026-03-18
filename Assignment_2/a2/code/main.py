@@ -242,7 +242,8 @@ def mnist_vqnb():
     )
     for y in range(10):
         for b in range(k):
-            ps = np.zeros(784)  # get the probabilities from your model
+            # ps = np.zeros(784)  # get the probabilities from your model
+            ps = model.theta[b, y, :]
             axes[b][y].imshow(ps.reshape((28, 28)), "gray")
             axes[b][y].set_axis_off()
     fig.savefig("../figs/vqnb_probs.pdf", bbox_inches="tight", pad_inches=0.1)
