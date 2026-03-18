@@ -82,7 +82,7 @@ class VQNB:
             else:
                 # Cluster the data for this class
                 kmeans = KMeans(self.n_clusters)
-                kmeans.fit(X_i)
+                kmeans.fit(X_i,log=False)
                 labels = kmeans.get_assignments(X_i)
                 
                 for j in range(self.n_clusters):

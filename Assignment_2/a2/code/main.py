@@ -224,7 +224,7 @@ def mnist_logreg():
 
 @handle("mnist-vqnb")
 def mnist_vqnb():
-    ks = [2, 3, 4, 5]
+    ks = [1, 2, 3, 4, 5]
     models = [VQNB(k=k) for k in ks]
     print("VQNB test set errors:")
     for k, err in zip(ks, eval_models(models, binarize=True)):
