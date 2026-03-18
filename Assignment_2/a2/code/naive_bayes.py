@@ -68,8 +68,8 @@ class VQNB:
         
         # Initialize parameters
         # theta shape: (n_clusters, n_classes, d)
-        self.theta = np.zeros((self.n_clusters, self.n_classes, d))
-        self.cluster_probs = np.zeros((self.n_clusters, self.n_classes))
+        self.theta = np.zeros((self.n_clusters, self.n_classes, d)) # P(X_j=1 | z, y)
+        self.cluster_probs = np.zeros((self.n_clusters, self.n_classes)) # P(z | y)
         self.class_probs = self.y_probs # P(Y)
         
         for i in range(self.n_classes): # Iterate over digits 0-9
@@ -88,7 +88,7 @@ class VQNB:
                 for j in range(self.n_clusters):
                     cluster_indices = np.where(labels == j)[0]
                     n_cluster = len(cluster_indices)
-                    self.cluster_probs[j, i] = n_cluster / len(X_i)
+                    self.cluster_probs[j, i] = n_cluster / len(X_i) # P(z | y=i)
                     
                     if n_cluster > 0:
                         feature_counts = np.sum(X_i[cluster_indices], axis=0)
