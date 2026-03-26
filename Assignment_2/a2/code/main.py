@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import quantile
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression as BaseLogReg
+from scipy.special import expit as sigmoid
 
 # make sure we're working in the directory this file lives in,
 # for simplicity with imports and relative paths
@@ -159,11 +160,30 @@ def plot_em():
     # compute log_liks: an array with shape the same as mus containing
     # the log-likelihood for each mu value
     # (ignoring an additive constant is fine)
-    raise NotImplementedError()
-
-    em_mus = [mu := 0]
+    # p(x | mu) = 0.5 * N(x; 0, 1) + 0.5 * N(x; mu, 1)
+    # log p(X | mu) = sum_i log[ 0.5 * exp(-x_i^2/2) + 0.5 * exp(-(x_i - mu)^2/2) ]
+    #                 + const            (the -0.5*log(2*pi) per sample cancels in the plot)
+    #
+    # We keep the constant so the curve is the true log-likelihood (up to n*const).
+    log_liks = np.array([
+        np.sum(
+            np.log(
+                0.5 * np.exp(-0.5 * X**2)
+                + 0.5 * np.exp(-0.5 * (X - mu)**2)
+            )
+        )
+        for mu in mus
+    ])
+ 
+    # EM iterations
+    em_mus = [mu := 0]          # initialise at mu = 0
     for _ in range(5):
-        mu = np.random.normal()  # TODO: replace
+        # E-step: responsibilities  r_i = sigma(mu * x_i - mu^2 / 2)
+        r = sigmoid(mu * X - 0.5 * mu**2)
+ 
+        # M-step: mu = sum(r_i * x_i) / sum(r_i)
+        mu = float(np.sum(r * X) / np.sum(r))
+ 
         em_mus.append(mu)
     em_mus = np.asarray(em_mus)
 
