@@ -38,7 +38,7 @@ def blogreg(mcmc=True, var=True):
     map_est = model.map_estimate(X_train, y_train)
 
     if mcmc:
-        mcmc_samples = model.sample_weights(X_train, y_train, n_samples=100_000)
+        mcmc_samples = model.sample_weights(X_train, y_train, n_samples=100_000,map_estimate=map_est)
         model.plot_weights(mcmc_samples, map_est, figname="blogreg-mcmc")
 
     if var:

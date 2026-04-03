@@ -31,7 +31,7 @@ class BayesianLogisticRegression:
     def log_prob(self, X, y, w):
         return self._get_log_prob(X, y)(w)
 
-    def sample_weights(self, X, y, n_samples, rng=None):
+    def sample_weights(self, X, y, n_samples, map_estimate=None, rng=None):
         if rng is None:
             rng = np.random.default_rng()
 
@@ -39,10 +39,10 @@ class BayesianLogisticRegression:
         log_prob = self._get_log_prob(X, y)
 
         samples = np.full((n_samples, d), np.nan)
-        w = np.zeros(d)
+        w = np.zeros(d) if map_estimate is None else map_estimate
         log_p = log_prob(w)
 
-        scale_factor = 1e-2 # added scale factor to make acceptance rate reasonable
+        scale_factor = 1e-1 # added scale factor to make acceptance rate reasonable
         
         n_accept = 0
         pbar = tqdm(range(n_samples))
