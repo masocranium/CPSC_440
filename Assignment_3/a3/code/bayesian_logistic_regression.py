@@ -136,8 +136,16 @@ class BayesianLogisticRegression:
             # should return the objective to *maximize*
             # (using a Monte Carlo estimate with batch_size samples)
             L = get_L()
+            
+            #sample eps ~ N(0, I) for batch size and reparameterize to get samples of w
+            eps = torch.randn(batch_size, d)
+            w_samples = mu + eps @ L.T  # [batch_size, d]
 
-            raise NotImplementedError()
+            log_probs = log_prob(w_samples.T)  # [batch_size]
+
+            log_joint = log_probs.mean()  # monte carlo estimate of E_q[log p(w, D)]
+            log_entropy = L_log_diag.sum() + 0.5 * d * (1 + np.log(2 * np.pi))  # entropy of q(w) + some minor constant to avoid floating point issues
+            return log_joint + log_entropy
 
         # LBFGS is too slow here with the higher-dimensional problem
         opt = torch.optim.Adam([mu, L_log_diag, L_tril], lr=0.1)
