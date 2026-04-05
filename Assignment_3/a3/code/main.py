@@ -102,7 +102,10 @@ def mc_sample():
 def mc_marginals():
     model = grad_chain()
 
-    raise NotImplementedError()
+    time = 30
+    marginals = model.marginals(length=time + 1)
+    print("Marginals at time 30:", marginals[:, time].round(3))
+
 
 
 @handle("mc-mostlikely-marginals")

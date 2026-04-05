@@ -47,7 +47,12 @@ class MarkovChain:
             init_probs = self.init_probs
 
         margs = np.zeros((self.num_states, length))
-        raise NotImplementedError()
+
+        for t in range(length):
+            if t == 0:
+                margs[:, t] = init_probs
+            else:
+                margs[:, t] = init_probs @ np.linalg.matrix_power(self.transition_probs, t)
 
         return margs
 
