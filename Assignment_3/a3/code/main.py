@@ -112,7 +112,19 @@ def mc_marginals():
 def mc_mostlikely():
     model = grad_chain()
 
-    raise NotImplementedError()
+    time = 30
+    marginals = model.marginals(length=time + 1)
+
+    # Find the most likely marginal for each time j
+    best_state_indices = marginals.argmax(axis=0)
+
+    most_likely_names = model.rename(best_state_indices)
+
+    for j, name in enumerate(most_likely_names):
+        print(f"Time {j}: {name} (p={marginals[best_state_indices[j], j]:.3f})")
+
+
+    return
 
 
 @handle("mc-mostlikely-sequence")
