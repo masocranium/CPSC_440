@@ -132,7 +132,9 @@ def mc_mostlikely_sequence():
     model = grad_chain()
 
     for time in [50, 100]:
-        print(f"Mode at time {time}: {model.mode(time)}")
+        best_path, path_prob = model.mode(time)
+        print(f"Mode at time {time}: {model.rename(best_path)} (p={path_prob:.4f})")
+
 
 
 @handle("mc-conditionals-past")

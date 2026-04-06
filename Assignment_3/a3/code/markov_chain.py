@@ -61,7 +61,51 @@ class MarkovChain:
         if init_probs is None:
             init_probs = self.init_probs
 
-        raise NotImplementedError()
+        # define a matrix of zeros of shape [self.num_states, length] containing the probability of each state across time, and a matrix of zeros of shape [self.num_states, length] containing the mode of each state across time
+        modes = np.zeros((self.num_states, length), dtype=int)
+        # find the marginals up to the given length
+        margs = self.marginals(length, init_probs) # to avoid unnecessarily recomputing marginals at each time step.
+        
+        
+        # Bottoms up DP approach:
+
+        # DP storage (structure only; no recursion/fill yet)
+        best_path_prob = np.full((self.num_states, length), -np.inf, dtype=float)
+        backptr = np.full((self.num_states, length), -1, dtype=int)
+
+        # base case at t=0
+        best_path_prob[:, 0] = np.log(init_probs + 1e-300) # this is the joint probability of being in each state at time 0 (which is just the initial distribution)
+        backptr[:, 0] = np.arange(self.num_states)
+        modes[:, 0] = np.arange(self.num_states)
+
+        # Need a matrix for 
+        for t in range(1,length):
+            # calculate the joint probability of each state at time t
+            for s in range(self.num_states):
+                # calculate the probability of being in state s at time t given each possible previous state
+                for prev_s in range(self.num_states):
+                    prob = best_path_prob[prev_s, t-1] + np.log(self.transition_probs[prev_s, s] + 1e-300)
+                    if prob > best_path_prob[s, t]: #check if greater than the default -inf value or the current best path probability for state s at time t
+                        best_path_prob[s, t] = prob
+                        backptr[s, t] = prev_s
+                modes[s, t] = backptr[s, t]
+
+
+        
+
+        # return the best path and it's respective log probability
+        best_final_state = np.argmax(best_path_prob[:, -1])
+
+        best_path = np.zeros(length, dtype=int)
+        best_path[-1] = best_final_state
+
+        for t in range(length-1,0,-1):
+            best_path[t-1] = modes[best_path[t], t]
+        
+        path_prob = best_path_prob[best_final_state, -1]
+
+
+        return best_path, np.exp(path_prob) # return the best path and the probability of that path (convert from log prob to prob)
 
     def conditional_prob(self, target_idx, future_state=None, past_state=None):
         # target_idx: the time index of the state we care about
