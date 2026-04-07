@@ -121,7 +121,11 @@ class MarkovChain:
             else:
                 past_idx, past_val = past_state
                 # want p(x_{target_idx} = ? | x_{past_idx} = past_val)
-                raise NotImplementedError()
+                # initialize a vector of zeros of shape [self.num_states] to hold the probabilities and set conditioned state probability to 1
+                cond_state_prob = np.zeros(self.num_states)
+                cond_state_prob[past_val] = 1.0
+
+                return cond_state_prob @ np.linalg.matrix_power(self.transition_probs, target_idx - past_idx)
 
         else:
             future_idx, future_val = future_state
